@@ -32,8 +32,8 @@
               ::http/join?    false
               ::http/secure-headers {:content-security-policy-settings {:object-src "none"}}
               ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
-  http/default-interceptors
-  http/dev-interceptors))
+      http/default-interceptors
+      http/dev-interceptors))
 
 (defn runnable-service [config routes service-component]
   (let [env           (:env config)
