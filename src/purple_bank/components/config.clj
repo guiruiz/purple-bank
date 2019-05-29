@@ -1,10 +1,19 @@
 (ns purple-bank.components.config
   (:require [com.stuartsierra.component :as component]))
 
+(def prod-config-map {:env         :prod
+                      :port        8080})
 
-(defrecord Config [config]
+(def dev-config-map {:env         :dev
+                     :port        8080})
+
+(def config-map
+  {:prod prod-config-map
+   :dev dev-config-map})
+
+(defrecord Config [env]
   component/Lifecycle
-  (start [this] this)
-  (stop [this] this))
+  (start [this] (assoc this :config (get config-map env)))
+  (stop [this] (dissoc this :config)))
 
-(defn new-config [config-map] (->Config config-map))
+(defn new-config [env] (map->Config {:env env}))

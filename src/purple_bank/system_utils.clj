@@ -12,7 +12,7 @@
 
 
 (defn start-system! [system-map]
-    (->> (system-map)
+    (->> system-map
          component/start
          (reset! system)))
 

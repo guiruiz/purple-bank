@@ -36,7 +36,7 @@
   http/dev-interceptors))
 
 (defn runnable-service [config routes service-comp]
-  (let [env           (:environment config)
+  (let [env           (:env config)
         port          (:port  config)
         service-map  (base-service-map routes port)]
     (-> (if(= env :prod)
