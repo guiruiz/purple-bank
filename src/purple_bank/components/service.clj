@@ -4,16 +4,18 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http :as http]))
 
-(defn- add-system [service]
-  (before (fn [context] (assoc-in context [:request :components] service))))
+(defn- add-system [service-comp]
+  (before (fn [context] (assoc-in context [:request :components] service-comp))))
 
 (defn system-interceptors
-  [service-map service]
+  "Extend to service's interceptors to include one to inject the components
+   into the request object"
+  [service-map service-comp]
   (update-in service-map
              [::http/interceptors]
-             #(vec (->> % (cons (add-system service))))))
+             #(vec (->> % (cons (add-system service-comp))))))
 
-(defn base-service [routes port]
+(defn base-service-map [routes port]
   {:env                  :prod
    ::http/router         :prefix-tree
    ::http/routes         #(route/expand-routes (deref routes))
@@ -21,10 +23,10 @@
    ::http/type           :jetty
    ::http/port           port})
 
-(defn prod-init [service-map]
+(defn prod-service-init [service-map]
   (http/default-interceptors service-map))
 
-(defn dev-init [service-map]
+(defn dev-service-init [service-map]
   (-> service-map
       (merge {:env            :dev
               ::http/join?    false
@@ -33,14 +35,14 @@
   http/default-interceptors
   http/dev-interceptors))
 
-(defn runnable-service [config routes service]
+(defn runnable-service [config routes service-comp]
   (let [env           (:environment config)
-        port          (:dev-port  config)
-        service-conf  (base-service routes port)]
-    (-> (if(= :prod env)
-          (prod-init service-conf)
-          (dev-init service-conf))
-        (system-interceptors service))))
+        port          (:port  config)
+        service-map  (base-service-map routes port)]
+    (-> (if(= env :prod)
+          (prod-service-init service-map)
+          (dev-service-init service-map))
+        (system-interceptors service-comp))))
 
 (defrecord Service [config routes]
   component/Lifecycle
