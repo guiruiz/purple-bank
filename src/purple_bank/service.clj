@@ -3,10 +3,11 @@
             [purple-bank.interceptor :as interceptor]
             [purple-bank.controller :as controller]))
 
-(defn say-hello
-  [{name :name}]
-  (let [message (controller/get-hello-message name)]
+(defn get-visitors
+  [{name :name
+    components :components}]
+  (let [message (controller/get-visitors name (:storage components))]
     (ring-resp/response message)))
 
-(def routes #{["/" :get (conj interceptor/common-interceptors interceptor/validate-name `say-hello)]})
+(def routes #{["/" :get (conj interceptor/common-interceptors interceptor/validate-name `get-visitors)]})
 

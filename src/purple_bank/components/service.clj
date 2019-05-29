@@ -4,16 +4,16 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http :as http]))
 
-(defn- add-system [service-comp]
-  (before (fn [context] (assoc-in context [:request :components] service-comp))))
+(defn- add-system [service-component]
+  (before (fn [context] (assoc-in context [:request :components] service-component))))
 
 (defn system-interceptors
   "Extend to service's interceptors to include one to inject the components
    into the request object"
-  [service-map service-comp]
+  [service-map service-component]
   (update-in service-map
              [::http/interceptors]
-             #(vec (->> % (cons (add-system service-comp))))))
+             #(vec (->> % (cons (add-system service-component))))))
 
 (defn base-service-map [routes port]
   {:env                  :prod
@@ -35,16 +35,16 @@
   http/default-interceptors
   http/dev-interceptors))
 
-(defn runnable-service [config routes service-comp]
+(defn runnable-service [config routes service-component]
   (let [env           (:env config)
         port          (:port  config)
         service-map  (base-service-map routes port)]
     (-> (if(= env :prod)
           (prod-service-init service-map)
           (dev-service-init service-map))
-        (system-interceptors service-comp))))
+        (system-interceptors service-component))))
 
-(defrecord Service [config routes]
+(defrecord Service [config routes storage]
   component/Lifecycle
   (start [this]
     (assoc this
