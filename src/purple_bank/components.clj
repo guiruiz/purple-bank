@@ -1,18 +1,18 @@
 (ns purple-bank.components
   (:require [com.stuartsierra.component :as component]
             [purple-bank.system-utils :as system-utils]
-            [purple-bank.components.config :as config]
-            [purple-bank.components.routes :as routes]
-            [purple-bank.components.service :as service]
-            [purple-bank.components.dev-servlet :as dev-servlet]
-            [purple-bank.service :as purple-bank.service]))
+            [purple-bank.components.config :as config-component]
+            [purple-bank.components.routes :as routes-component]
+            [purple-bank.components.service :as service-component]
+            [purple-bank.components.dev-servlet :as dev-servlet-component]
+            [purple-bank.service :as service]))
 
 (defn system-map [env]
   (component/system-map
-    :config (config/new-config env)
-    :routes (routes/new-routes #'purple-bank.service/routes)
-    :service (component/using (service/new-service) [:config :routes])
-    :servlet (component/using (dev-servlet/new-servlet) [:service])))
+    :config (config-component/new-config env)
+    :routes (routes-component/new-routes #'service/routes)
+    :service (component/using (service-component/new-service) [:config :routes])
+    :servlet (component/using (dev-servlet-component/new-servlet) [:service])))
 
 (defn create-and-start-system!
   ([] (create-and-start-system! :dev))
