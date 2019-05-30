@@ -9,19 +9,19 @@
    http/json-body])
 
 
-(def validate-name
-  {:name :validate-name
-   :enter (fn [context]
-            (let [name (get-in context [:request :params :name])]
-              (if (clojure.string/blank? name)
-                (chain/terminate (assoc context :response (ring-resp/status {} 400)))
-                (if (= name "3.14")
-                  (assoc-in context [:request :name] (str "Pi"))
-                  (assoc-in context [:request :name] (clojure.string/capitalize name))))))})
-
-
-(def validate-user
-  {:name :validate-user
-   :enter (fn [context]
-            (let [json (get-in context [:request :json-params])]
-              (assoc-in context [:request :name] (:name json))))})
+;(def validate-name
+;  {:name :validate-name
+;   :enter (fn [context]
+;            (let [name (get-in context [:request :params :name])]
+;              (if (clojure.string/blank? name)
+;                (chain/terminate (assoc context :response (ring-resp/status {} 400)))
+;                (if (= name "3.14")
+;                  (assoc-in context [:request :name] (str "Pi"))
+;                  (assoc-in context [:request :name] (clojure.string/capitalize name))))))})
+;
+;
+;(def validate-user-id
+;  {:name :validate-user-id
+;   :enter (fn [context]
+;            (let [user-id (get-in context [:request :json-params])]
+;              (assoc-in context [:request :name] (:name json))))})

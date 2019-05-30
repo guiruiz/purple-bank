@@ -17,6 +17,14 @@
         (ring-resp/status 201))
     (ring-resp/status {} 400)))
 
+(defn get-user
+  [{params :path-params
+    components :components}]
+  (if-let [user (controller/get-user (:storage components) (:user-id params))]
+    (ring-resp/response user)
+    (ring-resp/status {} 404)))
+
 (def routes #{["/" :get (conj interceptor/common-interceptors `welcome-message)]
-              ["/users" :post (conj interceptor/common-interceptors `create-user)]})
+              ["/users" :post (conj interceptor/common-interceptors `create-user)]
+              ["/users/:user-id" :get (conj interceptor/common-interceptors `get-user)]})
 
