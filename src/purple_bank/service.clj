@@ -3,11 +3,20 @@
             [purple-bank.interceptor :as interceptor]
             [purple-bank.controller :as controller]))
 
-(defn get-visitors
-  [{name :name
-    components :components}]
-  (let [message (controller/get-visitors name (:storage components))]
-    (ring-resp/response message)))
+(defn welcome-message [request]
+    (ring-resp/response "Welcome to Purple Bank! Check README.md to get started."))
 
-(def routes #{["/" :get (conj interceptor/common-interceptors interceptor/validate-name `get-visitors)]})
+(defn create-user
+  [{params :json-params
+    components :components}]
+  (if-let [user (controller/create-user (:storage components)
+                                        params)]
+    (-> user
+        ring-resp/response
+        (ring-resp/header "Location" (str "/users/" (:id user)))
+        (ring-resp/status 201))
+    (ring-resp/status {} 400)))
+
+(def routes #{["/" :get (conj interceptor/common-interceptors `welcome-message)]
+              ["/users" :post (conj interceptor/common-interceptors `create-user)]})
 

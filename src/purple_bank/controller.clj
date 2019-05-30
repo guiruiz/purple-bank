@@ -3,14 +3,11 @@
             [purple-bank.protocols.storage-client :as storage-client]))
 
 
-(defn get-visitors [name storage]
-  (do (let [visitor (logic/new-visitor name)]
-        (storage-client/put! storage [:visitors (:id visitor)] visitor))
-      (str "Hello, " (->> (storage-client/read-all storage)
-                             (:visitors)
-                             vals
-                             last
-                             (:name)) "!")))
+(defn create-user [storage params]
+  (let [user (logic/new-user params)]
+    (if (logic/validate-user user)
+      (do (storage-client/put! storage [:user (:id user)] user)
+          user))))
 
 
 
