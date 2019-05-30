@@ -11,5 +11,7 @@
           user))))
 
 (defn get-user [storage user-id]
-  (if-let [user (storage-client/read-one storage [:users (UUID/fromString user-id)])]
-    user))
+  (try (->> (UUID/fromString user-id)
+            (vector :users)
+            (storage-client/read-one storage))
+       (catch Exception e false)))
