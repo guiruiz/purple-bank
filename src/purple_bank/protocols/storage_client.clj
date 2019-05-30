@@ -2,5 +2,6 @@
 
 (defprotocol StorageClient
   (read-all   [storage])
-  (put!       [storage update-fn])
+  (read-one   [storage domain])
+  (put!       [storage domain data])
   (clear-all! [storage]))

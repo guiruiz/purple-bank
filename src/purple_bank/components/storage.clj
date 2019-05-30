@@ -11,9 +11,9 @@
 
   storage-client/StorageClient
   (read-all [_this] @storage)
-  (put! [_this update-fn] (swap! storage update-fn))
+  (read-one [_this domain] (get-in @storage domain))
+  (put! [_this domain data] (swap! storage #(assoc-in % domain data)))
   (clear-all! [_this] (reset! storage {})))
 
 (defn new-in-memory []
   (->InMemoryStorage (atom {})))
-
