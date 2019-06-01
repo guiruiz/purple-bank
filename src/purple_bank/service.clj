@@ -18,26 +18,26 @@
     (ring-resp/status {} 400)))
 
 (defn get-user
-  [{path-params :path-params
-    components :components}]
-  (if-let [user (controller/get-user (:storage components) (:user-id path-params))]
-    (ring-resp/response user)
-    (ring-resp/status {} 404)))
+  [{user :user}]
+    (ring-resp/response user))
 
 (defn create-transaction
   [{params :json-params
-    path-params :path-params
-    components :components}]
-   (let [user-id (:user-id path-params)
-         transaction (controller/create-transaction (:storage components)
-                                                       params
-                                                       user-id)]
+    components :components
+    user :user}]
+   (let [transaction (controller/create-transaction (:storage components) params user)]
      (-> transaction
          ring-resp/response
-         (ring-resp/header "Location" (str "/users/" user-id "/transactions/" (:id transaction)))
+         (ring-resp/header "Location" (str "/users/" (:id user) "/transactions/" (:id transaction)))
          (ring-resp/status 200))))
 
-(def routes #{["/" :get (conj interceptor/common-interceptors `welcome-message)]
-              ["/users" :post (conj interceptor/common-interceptors `create-user)]
-              ["/users/:user-id" :get (conj interceptor/common-interceptors `get-user)]
-              ["/users/:user-id/transactions" :post (conj interceptor/common-interceptors `create-transaction)]})
+(def routes #{["/" :get (conj interceptor/common-interceptors
+                              `welcome-message)]
+              ["/users" :post (conj interceptor/common-interceptors
+                                    `create-user)]
+              ["/users/:user-id" :get (conj interceptor/common-interceptors
+                                            interceptor/validate-user-id
+                                            `get-user)]
+              ["/users/:user-id/transactions" :post (conj interceptor/common-interceptors
+                                                          interceptor/validate-user-id
+                                                          `create-transaction)]})

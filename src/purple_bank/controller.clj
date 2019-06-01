@@ -16,20 +16,18 @@
             (storage-client/read-one storage))
        (catch Exception e false)))
 
-(defn create-transaction [storage params user-id]
-  (if-let [user (get-user storage user-id)]
-    (if-let [transaction (logic/new-transaction params)]
-      (if (logic/validate-transaction transaction)
-        (if (logic/validate-operation user transaction)
-          (do
-            (->>
-              (conj (:transactions user) transaction)
-              (assoc-in user [:transactions])
-              (logic/consolidate-user-balance)
-              (storage-client/put! storage [:users (:id user)]))
-            transaction)
-          "403 invalid operation")
-        "400 invalid transaction"))
-    "404 user not found"))
+(defn create-transaction [storage params user]
+  (if-let [transaction (logic/new-transaction params)]
+    (if (logic/validate-transaction transaction)
+      (if (logic/validate-operation user transaction)
+        (do
+          (->>
+            (conj (:transactions user) transaction)
+            (assoc-in user [:transactions])
+            (logic/consolidate-user-balance)
+            (storage-client/put! storage [:users (:id user)]))
+          transaction)
+        "403 invalid operation")
+      "400 invalid transaction")))
 ; REFACTOR ASAP
 ; get-user -> new-transaction -> validate transaction -> validate operation -> persist transaction
