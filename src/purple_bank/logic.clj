@@ -31,9 +31,9 @@
     :credit amount
     :debit (* amount -1)))
 
-(defn validate-operation [{balance :balance} transaction]
+(defn validate-operation [{balance :balance} {:keys [operation] :as transaction}]
   "Check if user has enough balance to realize the operation"
-  (if (= (:operation transaction) :debit)
+  (if (= operation :debit)
     (->> (get-transaction-value transaction)
          (+ balance)
          (< 0))
