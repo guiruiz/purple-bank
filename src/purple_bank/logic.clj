@@ -1,11 +1,10 @@
 (ns purple-bank.logic
   (:import [java.util UUID]))
 
-
 (defn new-user [params]
   {:id (UUID/randomUUID)
    :name (:name params)
-   :balance 0.0
+   :balance 0.00M
    :transactions []})
 
 (defn validate-user [{:keys [name] :as user}]
@@ -14,13 +13,13 @@
 (defn new-transaction [params]
   {:id (UUID/randomUUID)
    :operation (keyword (:operation params))
-   :amount  (:amount params)}) ; convert amount->money
+   :amount  (:amount params)})
 
 (def operations-set #{:credit :debit})
 
 (defn validate-transaction [{:keys [operation amount] :as transaction}]
   (and (contains? operations-set operation)
-       (double? amount)
+       (number? amount)
        (< 0 amount)
        transaction))
 
@@ -32,7 +31,8 @@
     amount))
 
 (defn consolidate-user-balance [transaction {:keys [balance] :as user}]
-  (->> (+ balance (get-transaction-value transaction))
+  (->> (bigdec (get-transaction-value transaction))
+       (+ balance)
        (assoc user :balance)))
 
 (defn validate-operation [user {:keys [operation] :as transaction}]
