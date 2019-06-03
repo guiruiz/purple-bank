@@ -17,23 +17,3 @@
               (if-let [user (controller/get-user storage user-id)]
                 (assoc-in context [:request :user] user)
                 (chain/terminate (assoc context :response (ring-resp/status {} 404))))))})
-
-
-
-
-;(def validate-name
-;  {:name :validate-name
-;   :enter (fn [context]
-;            (let [name (get-in context [:request :params :name])]
-;              (if (clojure.string/blank? name)
-;                (chain/terminate (assoc context :response (ring-resp/status {} 400)))
-;                (if (= name "3.14")
-;                  (assoc-in context [:request :name] (str "Pi"))
-;                  (assoc-in context [:request :name] (clojure.string/capitalize name))))))})
-;
-;
-;(def validate-user-id
-;  {:name :validate-user-id
-;   :enter (fn [context]
-;            (let [user-id (get-in context [:request :json-params])]
-;              (assoc-in context [:request :name] (:name json))))})
