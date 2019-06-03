@@ -16,7 +16,7 @@
                   user-id (get-in context [:request :path-params :user-id])]
               (if-let [user (controller/get-user storage user-id)]
                 (assoc-in context [:request :user] user)
-                (chain/terminate (assoc-in context :response (ring-resp/status {} 404))))))})
+                (chain/terminate (assoc context :response (ring-resp/status {} 404))))))})
 
 
 
