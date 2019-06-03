@@ -8,7 +8,6 @@
   (start [this]
     (assoc this :instance (-> service
                               :runnable-service
-                              (assoc ::http/join? false)
                               http/create-server
                               http/start)))
   (stop [this]
