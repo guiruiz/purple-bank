@@ -9,8 +9,7 @@
 (defn handle-create-user
   [{params :json-params
     components :components}]
-  (if-let [user (controller/create-user (:storage components)
-                                        params)]
+  (if-let [user (controller/create-user (:storage components) params)]
     (-> user
         ring-resp/response
         (ring-resp/header "Location" (str "/users/" (:id user)))
@@ -25,11 +24,14 @@
   [{params :json-params
     components :components
     user :user}]
-   (let [transaction (controller/create-transaction (:storage components) params user)]
-     (-> transaction
-         ring-resp/response
-         (ring-resp/header "Location" (str "/users/" (:id user) "/transactions/" (:id transaction)))
-         (ring-resp/status 200))))
+  (if-let [transaction (controller/build-transaction params)]
+    (if (controller/process-transaction (:storage components) user transaction)
+      (-> transaction
+          ring-resp/response
+          (ring-resp/header "Location" (str "/users" (:id user) "/transactions/" (:id transaction)))
+          (ring-resp/status 201))
+      (ring-resp/status {} 403))
+    (ring-resp/status {} 400)))
 
 (def routes #{["/" :get (conj interceptor/common-interceptors
                               `handle-welcome-message)]

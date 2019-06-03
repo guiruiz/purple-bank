@@ -27,22 +27,28 @@
 (defn get-transaction-value
   [{operation :operation
     amount :amount}]
-  (case operation
-    :credit amount
-    :debit (* amount -1)))
+  (if (= operation :debit)
+    (* amount -1)
+    amount))
 
-(defn validate-operation [{balance :balance} {:keys [operation] :as transaction}]
+(defn consolidate-user-balance [transaction {:keys [balance] :as user}]
+  (->> (+ balance (get-transaction-value transaction))
+       (assoc user :balance)))
+
+(defn validate-operation [user {:keys [operation] :as transaction}]
   "Check if user has enough balance to realize the operation"
   (if (= operation :debit)
-    (->> (get-transaction-value transaction)
-         (+ balance)
-         (< 0))
+    (-> (consolidate-user-balance transaction user)
+        (get :balance)
+        (>= 0))
     true))
 
-(defn consolidate-user-balance [user]
-  (->> (:transactions user)
-       (map #(get-transaction-value %))
-       (reduce +)
-       (assoc user :balance)))
+
+
+;(defn consolidate-user-balance [user]
+;  (->> (:transactions user)
+;       (map #(get-transaction-value %))
+;       (reduce +)
+;       (assoc user :balance)))
 
 
