@@ -4,6 +4,7 @@
 (def system (atom nil))
 
 (defn stop-components! []
+  "Stops components system and returns it."
   (swap! system #(component/stop %)))
 
 (defn stop-system! []
@@ -12,6 +13,7 @@
 
 
 (defn start-system! [system-map]
+  "Starts components system and returns it."
     (->> system-map
          component/start
          (reset! system)))

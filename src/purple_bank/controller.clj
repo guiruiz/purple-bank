@@ -5,25 +5,31 @@
 
 
 (defn create-user [storage params]
+  "Builds and validates user. If it's valid, puts the user on storage and returns it."
   (let [user (logic/new-user params)]
     (if (logic/validate-user user)
       (do (storage-client/put! storage [:users (:id user)] user) user))))
 
 (defn get-user [storage user-id]
+  "Retrieves user from storage identified by user-id."
   (try (->> (UUID/fromString user-id)
             (vector :users)
             (storage-client/read-one storage))
        (catch Exception e false)))
 
 (defn build-transaction [params]
+  "Builds and validates transaction. If it's valid, returns the transaction."
   (->> (logic/new-transaction params)
        (logic/validate-transaction)))
 
 (defn process-transaction [storage user transaction]
+  "Validates transaction operation. If it's valid, appends transaction to user, updates user balance,
+   saves the user and returns the transaction."
   (if (logic/validate-operation user transaction)
     (do
       (->> (conj (:transactions user) transaction)
            (assoc-in user [:transactions])
-           (logic/consolidate-user-balance transaction)
+           (logic/calculate-user-balance transaction)
            (storage-client/put! storage [:users (:id user)]))
       transaction)))
+

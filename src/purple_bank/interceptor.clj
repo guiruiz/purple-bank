@@ -10,6 +10,10 @@
    http/json-body])
 
 (def validate-user-id
+  ;; Get user-id from path-params and tries to retrieve the user from storage.
+  ;; If the user is found, associates it to request on context.
+  ;; If the user is not found, associates status code 404 to response on context
+  ;; and terminates interceptors chain.
   {:name :validate-user-id
    :enter (fn [context]
             (let [storage (get-in context [:request :components :storage])
