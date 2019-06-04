@@ -8,13 +8,17 @@
                          :operation :credit
                          :amount 100})
 
+(def credit-transaction-2 {:id (UUID/randomUUID)
+                           :operation :credit
+                           :amount 200})
+
 (def debit-transaction-1 {:id (UUID/randomUUID)
                            :operation :debit
                            :amount 50})
 
 (def debit-transaction-2 {:id (UUID/randomUUID)
                           :operation :debit
-                          :amount 200})
+                          :amount 175})
 
 (def user {:id (UUID/randomUUID)
            :name "Joao"
@@ -24,6 +28,11 @@
 (def user-mock
   (->(assoc user :transactions [credit-transaction-1])
      (assoc :balance 100M)))
+
+(defn process-mock-transactions [user]
+  (-> (logic/process-user-transaction user debit-transaction-1)
+      (logic/process-user-transaction credit-transaction-2)
+      (logic/process-user-transaction debit-transaction-2)))
 
 (facts "User"
 
@@ -90,4 +99,22 @@
              (logic/validate-operation user-mock debit-transaction-1) => true?)
 
        (fact "validates invalid transaction operation"
-             (logic/validate-operation user-mock debit-transaction-2) => false?))
+             (logic/validate-operation user-mock debit-transaction-2) => false?)
+
+       (fact "process valid transaction operation"
+             (logic/process-user-transaction user-mock debit-transaction-1) => (just (-> (assoc user :transactions [credit-transaction-1
+                                                                                                                    debit-transaction-1])
+                                                                                         (assoc :balance 50M))))
+
+       (fact "validates user balance on credit transaction"
+             (-> (logic/calculate-user-balance credit-transaction-2 user-mock)
+                 (:balance)) => 300M)
+
+       (fact "validates user balance on debit transaction"
+             (-> (logic/calculate-user-balance debit-transaction-1 user-mock)
+                 (:balance)) => 50M)
+
+       (fact "validates user balance after few transactions processes"
+             (-> (process-mock-transactions user-mock) (:balance)) => (-> (process-mock-transactions user-mock)
+                                                                          (logic/consolidate-user-balance)
+                                                                          (:balance))))

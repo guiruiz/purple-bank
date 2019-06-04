@@ -56,12 +56,12 @@
        (assoc-in user [:transactions])
        (calculate-user-balance transaction)))
 
-;(defn consolidate-user-balance [user]
-;  "Consolidates user balance from its transactions.
-;  (->> (:transactions user)
-;       (map #(get-transaction-value %))
-;       (reduce +)
-;       (assoc user :balance)))
+(defn consolidate-user-balance [user]
+  "Consolidates user balance from its transactions."
+  (->> (:transactions user)
+       (map #(bigdec (get-transaction-value %)))
+       (reduce +)
+       (assoc user :balance)))
 
 
 
