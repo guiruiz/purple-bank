@@ -8,7 +8,7 @@
 
 (defn init!
   [world]
-  (let [component-system (components/ensure-system-up! :test)]
+  (let [component-system (components/get-or-create-system! :test)]
     (storage-client/clear-all! (:storage component-system))
     (assoc world :system component-system)))
 

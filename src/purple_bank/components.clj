@@ -29,6 +29,8 @@
   []
   (system-utils/stop-components!))
 
-(defn ensure-system-up! [env]
+(defn get-or-create-system!
+  "Gets or creates component system"
+  [env]
   (or (deref system-utils/system)
       (create-and-start-system! env)))

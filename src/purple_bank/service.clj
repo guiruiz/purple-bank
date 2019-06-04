@@ -3,8 +3,9 @@
             [purple-bank.interceptor :as interceptor]
             [purple-bank.controller :as controller]))
 
-(defn welcome-message-handler [request]
-    (ring-resp/response "Welcome to Purple Bank! Check README.md to get started."))
+(defn welcome-message-handler
+  [request]
+  (ring-resp/response "Welcome to Purple Bank! Check README.md to get started."))
 
 (defn create-user-handler
   "Tries to create a new user from request. If it's successful, returns response with status code 201,
