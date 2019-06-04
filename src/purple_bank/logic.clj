@@ -12,7 +12,7 @@
 
 (defn validate-user [{:keys [name] :as user}]
   "Validates user and returns it if it's valid or false if its not."
-  (and (string? name) user))
+  (and (string? name) (not (clojure.string/blank? name)) user))
 
 (defn new-transaction [params]
   "Builds a new transaction from params and return it."
@@ -28,7 +28,7 @@
        transaction))
 
 (defn get-transaction-value
-  "Get mathematical value from transaction according to its operation type."
+  "Returns transaction absolute value according to its operation type."
   [{operation :operation
     amount :amount}]
   (if (= operation :debit)
