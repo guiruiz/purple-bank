@@ -50,6 +50,12 @@
         (>= 0))
     true))
 
+(defn process-user-transaction [user transaction]
+  "Adds transaction to user transactions, updates user balance and returns the user."
+  (->> (conj (:transactions user) transaction)
+       (assoc-in user [:transactions])
+       (calculate-user-balance transaction)))
+
 ;(defn consolidate-user-balance [user]
 ;  "Consolidates user balance from its transactions.
 ;  (->> (:transactions user)

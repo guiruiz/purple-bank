@@ -23,13 +23,11 @@
        (logic/validate-transaction)))
 
 (defn process-transaction [storage user transaction]
-  "Validates transaction operation. If it's valid, appends transaction to user, updates user balance,
-   saves the user and returns the transaction."
+  "Validates transaction operation. If it's valid, process transaction, updates the user on storage
+  and returns the transaction."
   (if (logic/validate-operation user transaction)
     (do
-      (->> (conj (:transactions user) transaction)
-           (assoc-in user [:transactions])
-           (logic/calculate-user-balance transaction)
+      (->> (logic/process-user-transaction user transaction)
            (storage-client/put! storage [:users (:id user)]))
       transaction)))
 
