@@ -11,6 +11,8 @@
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "purple-bank.server/run-dev"]}
                    :dependencies [[io.pedestal/pedestal.service-tools "0.5.5"]
-                                  [midje "1.9.1"]]}
+                                  [midje "1.9.1"]
+                                  [org.clojure/data.json "0.2.6"]
+                                  [nubank/selvage "0.0.1"]]}
              :uberjar {:aot [purple-bank.server]}}
   :main ^{:skip-aot true} purple-bank.server)

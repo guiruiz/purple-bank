@@ -29,8 +29,7 @@
 
 (defn get-transaction-value
   "Returns transaction absolute value according to its operation type."
-  [{operation :operation
-    amount :amount}]
+  [{operation :operation amount :amount}]
   (if (= operation :debit)
     (* amount -1)
     amount))

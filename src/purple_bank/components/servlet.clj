@@ -1,20 +1,24 @@
-(ns purple-bank.components.dev-servlet
+(ns purple-bank.components.servlet
   (:require [com.stuartsierra.component :as component]
             [io.pedestal.http :as http]
             [io.pedestal.service-tools.dev :as dev]))
 
-(defrecord DevServlet [service]
+(defn start-server? [{env :env}]
+  (or (= :prod env) (= :dev env)))
+
+(defrecord Servlet [service config]
   component/Lifecycle
   (start [this]
-    (assoc this :instance (-> service
-                              :runnable-service
-                              http/create-server
-                              http/start)))
+    (assoc this :instance (cond-> service
+                                  true :runnable-service
+                                  true http/create-server
+                                  (start-server? config) http/start)))
   (stop [this]
     (http/stop (:instance this))
     (dissoc this :instance)))
 
-(defn new-servlet [] (map->DevServlet {}))
+(defn new-servlet [] (map->Servlet {}))
+
 
 (defn main [start-fn & _args]
   (start-fn {:mode :embedded}))

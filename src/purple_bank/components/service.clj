@@ -15,33 +15,32 @@
              [::http/interceptors]
              #(vec (->> % (cons (add-system service-component))))))
 
-(defn base-service-map [routes port]
-  {:env                  :prod
+(defn prod-service-init [service-map]
+  (http/default-interceptors service-map))
+
+(defn local-service-init [service-map]
+  (-> service-map
+      (merge {::http/join?    false
+              ::http/secure-headers {:content-security-policy-settings {:object-src "none"}}
+              ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
+      http/default-interceptors
+      http/dev-interceptors))
+
+(defn base-service-map [routes port env]
+  {:env                  env
    ::http/router         :prefix-tree
    ::http/routes         #(route/expand-routes (deref routes))
    ::http/resource-path  "/public"
    ::http/type           :jetty
    ::http/port           port})
 
-(defn prod-service-init [service-map]
-  (http/default-interceptors service-map))
-
-(defn dev-service-init [service-map]
-  (-> service-map
-      (merge {:env            :dev
-              ::http/join?    false
-              ::http/secure-headers {:content-security-policy-settings {:object-src "none"}}
-              ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
-      http/default-interceptors
-      http/dev-interceptors))
-
 (defn runnable-service [config routes service-component]
   (let [env           (:env config)
         port          (:port  config)
-        service-map  (base-service-map routes port)]
+        service-map  (base-service-map routes port env)]
     (-> (if(= env :prod)
           (prod-service-init service-map)
-          (dev-service-init service-map))
+          (local-service-init service-map))
         (system-interceptors service-component))))
 
 (defrecord Service [config routes storage]

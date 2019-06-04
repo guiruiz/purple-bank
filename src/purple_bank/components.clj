@@ -5,7 +5,7 @@
             [purple-bank.components.routes :as routes-component]
             [purple-bank.components.storage :as storage-component]
             [purple-bank.components.service :as service-component]
-            [purple-bank.components.dev-servlet :as dev-servlet-component]
+            [purple-bank.components.servlet :as servlet-component]
             [purple-bank.service :as service]))
 
 (defn system-map
@@ -16,7 +16,7 @@
     :storage (storage-component/new-in-memory)
     :routes (routes-component/new-routes #'service/routes)
     :service (component/using (service-component/new-service) [:config :routes :storage])
-    :servlet (component/using (dev-servlet-component/new-servlet) [:service])))
+    :servlet (component/using (servlet-component/new-servlet) [:service :config])))
 
 (defn create-and-start-system!
   "Creates and start components system."
@@ -28,3 +28,7 @@
   "Stops components system and returns it."
   []
   (system-utils/stop-components!))
+
+(defn ensure-system-up! [env]
+  (or (deref system-utils/system)
+      (create-and-start-system! env)))

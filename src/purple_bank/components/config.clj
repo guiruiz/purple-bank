@@ -7,9 +7,13 @@
 (def dev-config-map {:env         :dev
                      :port        8080})
 
+(def test-config-map {:env         :test
+                      :port        8080})
+
 (def config-map
   {:prod prod-config-map
-   :dev dev-config-map})
+   :dev dev-config-map
+   :test test-config-map})
 
 (defrecord Config [env]
   component/Lifecycle
