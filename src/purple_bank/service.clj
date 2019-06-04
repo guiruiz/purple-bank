@@ -25,10 +25,10 @@
     (ring-resp/response user))
 
 (defn create-transaction-handler
-  "First, tries to build a transaction. If the transaction is valid, tries to process it.
-  If the transaction process is successful, returns a response with status code 201,
-  created transaction on body and a Location header containing transaction path.
-  If the transaction couldn't be processed, returns a response with status code 403.
+  "First, tries to build a transaction. If the transaction is valid, then tries to process it.
+  If the transaction process is successful, returns a response with status code 201 and
+  created transaction on body. If the transaction couldn't be processed due to insufficient
+  user balance, returns a response with status code 403.
   If the transaction is invalid, returns a response with status code 400."
   [{params :json-params
     components :components
@@ -37,7 +37,6 @@
     (if (controller/process-transaction (:storage components) user transaction)
       (-> transaction
           ring-resp/response
-          (ring-resp/header "Location" (str "/users" (:id user) "/transactions/" (:id transaction)))
           (ring-resp/status 201))
       (ring-resp/status {} 403))
     (ring-resp/status {} 400)))
