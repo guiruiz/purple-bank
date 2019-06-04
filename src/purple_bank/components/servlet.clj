@@ -1,7 +1,6 @@
 (ns purple-bank.components.servlet
   (:require [com.stuartsierra.component :as component]
-            [io.pedestal.http :as http]
-            [io.pedestal.service-tools.dev :as dev]))
+            [io.pedestal.http :as http]))
 
 (defn start-server? [{env :env}]
   (or (= :prod env) (= :dev env)))
@@ -18,11 +17,3 @@
     (dissoc this :instance)))
 
 (defn new-servlet [] (map->Servlet {}))
-
-
-(defn main [start-fn & _args]
-  (start-fn {:mode :embedded}))
-
-(defn run-dev [start-fn & _args]
-  (dev/watch)
-  (start-fn {:mode :embedded}))
