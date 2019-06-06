@@ -1,7 +1,6 @@
 (ns purple-bank.protocols.storage-client)
 
 (defprotocol StorageClient
-  (read-all   [storage])
-  (read-one   [storage domain])
-  (put!       [storage domain data])
+  (read-one   [storage key])
+  (put!       [storage key data])
   (clear-all! [storage]))

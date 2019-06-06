@@ -1,6 +1,6 @@
 (ns purple-bank.controller
   (:require [purple-bank.logic :as logic]
-            [purple-bank.protocols.storage-client :as storage-client])
+            [purple-bank.db.purple-bank :as db.purple-bank])
   (:import [java.util UUID]))
 
 
@@ -9,15 +9,14 @@
   [storage user-name]
   (let [user (logic/new-user user-name)]
     (if (logic/validate-user user)
-      (do (storage-client/put! storage [:users (:id user)] user) user))))
+      (do (db.purple-bank/save-user! user storage) user))))
 
 (defn get-user
   "Retrieves user from storage identified by user-id."
   [storage user-id]
-  (try (->> (UUID/fromString user-id)
-            (vector :users)
-            (storage-client/read-one storage))
-       (catch Exception e false)))
+  (try (-> (UUID/fromString user-id)
+           (db.purple-bank/get-user storage))
+       (catch Exception _ false)))
 
 (defn build-transaction
   "Builds and validates transaction. If it's valid, returns the transaction."
@@ -31,7 +30,7 @@
   [storage user transaction]
   (if (logic/validate-operation user transaction)
     (do
-      (->> (logic/process-user-transaction user transaction)
-           (storage-client/put! storage [:users (:id user)]))
+      (-> (logic/process-user-transaction user transaction)
+           (db.purple-bank/save-user! storage))
       transaction)))
 
