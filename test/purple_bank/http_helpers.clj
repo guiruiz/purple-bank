@@ -5,8 +5,8 @@
             [purple-bank.system-utils :as system-utils]))
 
 
-(defn service-fn []
-  (::http/service-fn (:instance (system-utils/get-component :servlet))))
+(defn get-service-fn []
+  (-> :servlet system-utils/get-component! :instance ::http/service-fn))
 
 (defn parse-response [{:keys [headers status body]}]
   {:body (when (not (clojure.string/blank? body)) (json/read-str body :key-fn keyword))
@@ -14,7 +14,7 @@
    :headers headers})
 
 (defn execute-request [method url body]
-  (response-for (service-fn) method url
+  (response-for (get-service-fn) method url
                 :body (when body (json/write-str body))
                 :headers {"Content-Type" "application/json"}))
 

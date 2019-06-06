@@ -7,7 +7,7 @@
   "Stops components system and returns it."
   (swap! system #(component/stop %)))
 
-(defn get-component [component-name]
+(defn get-component! [component-name]
   (some-> system deref (get component-name)))
 
 (defn stop-system! []
