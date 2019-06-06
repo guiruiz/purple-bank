@@ -1,4 +1,4 @@
-(ns purple-bank.user-flow
+(ns purple-bank.banking-flow
   (:require [midje.sweet :refer :all]
             [purple-bank.components :as components]
             [purple-bank.protocols.storage-client :as storage-client]
