@@ -42,15 +42,17 @@
   [{{:keys [user-id]} :path-params
     {:keys [operation amount]} :json-params
     {:keys [storage]} :components}]
-  (if-let [user (controller/get-user storage user-id)]
-    (if-let [transaction (controller/build-transaction operation amount)]
-      (if (controller/process-transaction storage user transaction)
-        (-> transaction
-            ring-resp/response
-            (ring-resp/status 201))
-        (ring-resp/status {} 403))
-      (ring-resp/status {} 400))
-    (ring-resp/status {} 404)))
+  (let [user (controller/get-user storage user-id)
+        transaction (controller/build-transaction operation amount)]
+    (if user
+      (if transaction
+        (if (controller/process-transaction storage user transaction)
+          (-> transaction
+              ring-resp/response
+              (ring-resp/status 201))
+          (ring-resp/status {} 403))
+        (ring-resp/status {} 400))
+      (ring-resp/status {} 404))))
 
 
 (def routes #{["/" :get (conj common-interceptors
