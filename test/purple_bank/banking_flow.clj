@@ -2,8 +2,7 @@
   (:require [midje.sweet :refer :all]
             [purple-bank.components :as components]
             [purple-bank.protocols.storage-client :as storage-client]
-            [purple-bank.system-utils :as system-utils]
-            [purple-bank.test-helper :as test-helper]
+            [purple-bank.http-helpers :as http-helpers]
             [selvage.flow :refer [*world* flow]]))
 
 (defn init!
@@ -14,10 +13,7 @@
 
 (defn create-user
   [world body]
-  (let [user-response (test-helper/response (system-utils/get-component :servlet)
-                                   :post "/users"
-                                   :headers {"Content-Type" "application/json"}
-                                   :body body)]
+  (let [user-response (http-helpers/POST "/users" body)]
     (assoc
       (if (= 201 (:status user-response))
         (assoc world :user-id (get-in user-response [:body :id]))
@@ -27,9 +23,7 @@
 
 (defn get-user
   [world user-id]
-  (let [user-response (test-helper/response (system-utils/get-component :servlet)
-                                            :get (str "/users/" user-id)
-                                            :headers {"Accept" "application/json"})]
+  (let [user-response (http-helpers/GET (str "/users/" user-id))]
     (assoc
       world
       :get-user-response
@@ -37,10 +31,7 @@
 
 (defn create-transaction
   [world body user-id]
-  (let [transaction-response (test-helper/response (system-utils/get-component :servlet)
-                                                   :post (str "/users/" user-id "/transactions")
-                                                   :headers {"Content-Type" "application/json"}
-                                                   :body body)]
+  (let [transaction-response (http-helpers/POST (str "/users/" user-id "/transactions") body)]
     (assoc
       (if (= 201 (:status transaction-response))
              (assoc world :transaction-id (get-in transaction-response [:body :id]))
@@ -71,7 +62,7 @@
   ;; Expects response code 404
   (fact (get-in *world* [:get-user-response :status]) => 404)
   ;; Validates response body
-  (fact (get-in *world* [:get-user-response :body]) => "")
+  (fact (get-in *world* [:get-user-response :body]) => nil)
 
   ;; Tries to get an existent user
   (fn [world] (get-user world (:user-id world)))
@@ -87,14 +78,14 @@
   ;; Expects response code 400
   (fact (get-in *world* [:create-transaction-response :status]) => 400)
   ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => "")
+  (fact (get-in *world* [:create-transaction-response :body]) => nil)
 
   ;; Tries to create a valid transaction to an nonexistent user
   (fn [world] (create-transaction world {:operation "credit" :amount 20} "anyuser"))
   ;; Expects response code 404
   (fact (get-in *world* [:create-transaction-response :status]) => 404)
   ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => "")
+  (fact (get-in *world* [:create-transaction-response :body]) => nil)
 
   ;; Tries to create a valid credit transaction to an existent user
   (fn [world] (create-transaction world {:operation "credit" :amount 20.45} (:user-id world)))
@@ -122,4 +113,5 @@
   ;; Expects response code 403
   (fact (get-in *world* [:create-transaction-response :status]) => 403)
   ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => ""))
+  (fact (get-in *world* [:create-transaction-response :body]) => nil)
+  )
