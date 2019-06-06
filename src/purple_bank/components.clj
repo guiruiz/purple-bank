@@ -4,7 +4,7 @@
             [purple-bank.components.config :as config-component]
             [purple-bank.components.routes :as routes-component]
             [purple-bank.components.storage :as storage-component]
-            [purple-bank.components.http-kit :as http-kit-component]
+            [purple-bank.components.logger :as logger-component]
             [purple-bank.components.service :as service-component]
             [purple-bank.components.servlet :as servlet-component]
             [purple-bank.service :as service]))
@@ -16,8 +16,8 @@
     :config (config-component/new-config env)
     :storage (storage-component/new-in-memory)
     :routes (routes-component/new-routes #'service/routes)
-    :http (http-kit-component/new-http-client)
-    :service (component/using (service-component/new-service) [:config :routes :storage])
+    :logger (component/using (logger-component/new-logger) [:config])
+    :service (component/using (service-component/new-service) [:config :routes :storage :logger])
     :servlet (component/using (servlet-component/new-servlet) [:service :config])))
 
 (defn create-and-start-system!

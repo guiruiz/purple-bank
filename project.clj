@@ -7,7 +7,7 @@
                  [io.pedestal/pedestal.service "0.5.5"]
                  [io.pedestal/pedestal.jetty "0.5.5"]
                  [com.stuartsierra/component "0.4.0"]
-                 [http-kit "2.2.0"]]
+                 [org.clojure/tools.logging "0.4.1"]]
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "purple-bank.server/run-dev"]}

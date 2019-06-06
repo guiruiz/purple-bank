@@ -43,7 +43,7 @@
           (local-service-init service-map))
         (system-interceptors service-component))))
 
-(defrecord Service [config routes storage]
+(defrecord Service [config routes storage logger]
   component/Lifecycle
   (start [this]
     (assoc this

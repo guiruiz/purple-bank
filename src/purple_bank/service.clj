@@ -17,8 +17,8 @@
   created user on body and a Location header containing user path. If it's unsuccessful, returns
   response with status code 400."
   [{{:keys [name]}    :json-params
-    {:keys [storage]} :components}]
-  (if-let [user (controller/create-user name storage)]
+    {:keys [storage logger]} :components}]
+  (if-let [user (controller/create-user name storage logger)]
     (-> user
         ring-resp/response
         (ring-resp/header "Location" (str "/users/" (:id user)))
@@ -28,25 +28,25 @@
 (defn get-user-handler
   "Returns response with status code 200 and the user on its body."
   [{{:keys [user-id]} :path-params
-    {:keys [storage]} :components}]
-    (if-let [user (controller/get-user user-id storage)]
+    {:keys [storage logger]} :components}]
+    (if-let [user (controller/get-user user-id storage logger)]
       (ring-resp/response user)
       (ring-resp/status {} 404)))
 
 (defn create-transaction-handler
   "First, tries to build a transaction. If the transaction is valid, then tries to process it.
   If the transaction process is successful, returns a response with status code 201 and
-  created transaction on body. If the transaction couldn't be processed due to insufficient
+  created transaction  on body. If the transaction couldn't be processed due to insufficient
   user balance, returns a response with status code 403.
   If the transaction is invalid, returns a response with status code 400."
   [{{:keys [user-id]} :path-params
     {:keys [operation amount]} :json-params
-    {:keys [storage]} :components}]
-  (let [user (controller/get-user user-id storage)
-        transaction (controller/build-transaction operation amount)]
+    {:keys [storage logger]} :components}]
+  (let [user (controller/get-user user-id storage logger)
+        transaction (controller/build-transaction operation amount logger)]
     (if user
       (if transaction
-        (if (controller/process-transaction transaction user storage)
+        (if (controller/process-transaction transaction user storage logger)
           (-> transaction
               ring-resp/response
               (ring-resp/status 201))
