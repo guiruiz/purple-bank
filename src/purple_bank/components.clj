@@ -5,11 +5,12 @@
             [purple-bank.components.routes :as routes-component]
             [purple-bank.components.storage :as storage-component]
             [purple-bank.components.logger :as logger-component]
+            [purple-bank.components.debug-logger :as debug-logger-component]
             [purple-bank.components.service :as service-component]
             [purple-bank.components.servlet :as servlet-component]
             [purple-bank.service :as service]))
 
-(defn system-map
+(defn base-system-map
   "Builds components system map and returns it."
   [env]
   (component/system-map
@@ -20,11 +21,21 @@
     :service (component/using (service-component/new-service) [:config :routes :storage :logger])
     :servlet (component/using (servlet-component/new-servlet) [:service :config])))
 
+(defn local-system-map
+  [env]
+  (merge (base-system-map env)
+         (component/system-map
+           :logger (component/using (debug-logger-component/new-debug-logger) [:config]))))
+
+(def system-map
+  {:prod  (base-system-map :prod)
+   :dev   (local-system-map :dev)
+   :test  (local-system-map :test)})
+
 (defn create-and-start-system!
   "Creates and start components system."
   ([] (create-and-start-system! :dev))
-  ([env] (system-utils/start-system! (system-map env))))
-
+  ([env] (system-utils/start-system! (env system-map))))
 
 (defn stop-system!
   "Stops components system and returns it."

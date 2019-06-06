@@ -17,7 +17,7 @@
 (defn get-user
   "Retrieves user from storage identified by user-id."
   [user-id storage logger]
-  (logger-client/log logger "getting-user" user-id)
+  (logger-client/log logger "getting-user" {:user-id user-id})
   (try (-> (UUID/fromString user-id)
            (db.purple-bank/get-user storage))
        (catch Exception _ false)))
