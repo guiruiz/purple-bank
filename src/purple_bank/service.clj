@@ -18,7 +18,7 @@
   response with status code 400."
   [{{:keys [name]}    :json-params
     {:keys [storage]} :components}]
-  (if-let [user (controller/create-user storage name)]
+  (if-let [user (controller/create-user name storage)]
     (-> user
         ring-resp/response
         (ring-resp/header "Location" (str "/users/" (:id user)))
@@ -29,7 +29,7 @@
   "Returns response with status code 200 and the user on its body."
   [{{:keys [user-id]} :path-params
     {:keys [storage]} :components}]
-    (if-let [user (controller/get-user storage user-id)]
+    (if-let [user (controller/get-user user-id storage)]
       (ring-resp/response user)
       (ring-resp/status {} 404)))
 
@@ -42,11 +42,11 @@
   [{{:keys [user-id]} :path-params
     {:keys [operation amount]} :json-params
     {:keys [storage]} :components}]
-  (let [user (controller/get-user storage user-id)
+  (let [user (controller/get-user user-id storage)
         transaction (controller/build-transaction operation amount)]
     (if user
       (if transaction
-        (if (controller/process-transaction storage user transaction)
+        (if (controller/process-transaction transaction user storage)
           (-> transaction
               ring-resp/response
               (ring-resp/status 201))
