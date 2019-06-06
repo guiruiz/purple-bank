@@ -10,7 +10,7 @@
 
 (defn welcome-message-handler
   [_request]
-  (ring-resp/response "Welcome to Purple Bank! Check README.md to get started."))
+  (ring-resp/response {:message "Welcome to Purple Bank! Check README.md to get started."}))
 
 (defn create-user-handler
   "Tries to create a new user from request. If it's successful, returns response with status code 201,
