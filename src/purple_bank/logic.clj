@@ -3,10 +3,10 @@
 
 (def operations-set #{:credit :debit})
 
-(defn new-user [params]
+(defn new-user [name]
   "Builds a new user from params and return it."
   {:id (UUID/randomUUID)
-   :name (:name params)
+   :name name
    :balance 0.00M
    :transactions []})
 
@@ -14,11 +14,11 @@
   "Validates user and returns it if it's valid or false if its not."
   (and (string? name) (not (clojure.string/blank? name)) user))
 
-(defn new-transaction [params]
+(defn new-transaction [operation amount]
   "Builds a new transaction from params and return it."
   {:id (UUID/randomUUID)
-   :operation (keyword (:operation params))
-   :amount  (:amount params)})
+   :operation (keyword operation)
+   :amount  amount})
 
 (defn validate-transaction [{:keys [operation amount] :as transaction}]
   "Validates transaction and returns it if it's valid or false if its not."

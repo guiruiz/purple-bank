@@ -37,54 +37,46 @@
 (facts "User"
 
        (fact "builds successful"
-             (logic/new-user {:name "Joao"}) => (just {:id uuid?
+             (logic/new-user "Joao") => (just {:id uuid?
                                                        :name "Joao"
                                                        :balance 0.00M
                                                        :transactions []}))
        (fact "validates valid name"
-             (-> (logic/new-user {:name "Joao"})
+             (-> (logic/new-user  "Joao")
                  (logic/validate-user)) => truthy)
 
        (fact "validates empty name"
-             (-> (logic/new-user {:name ""})
+             (-> (logic/new-user "")
                  (logic/validate-user)) => false?)
 
        (fact "validates invalid name"
-             (-> (logic/new-user {:name 1234})
-                 (logic/validate-user)) => false?)
-
-       (fact "validates invalid params"
-             (-> (logic/new-user {:foo 0000})
-                 (logic/validate-user)) => false?)
-
-       (fact "validates empty params"
              (-> (logic/new-user {})
                  (logic/validate-user)) => false?))
 
 (facts "Transaction"
 
        (fact "builds successful"
-             (logic/new-transaction {:operation "credit" :amount 20}) => (just {:id uuid?
-                                                                                :operation :credit
-                                                                                :amount 20}))
+             (logic/new-transaction "credit" 20) => (just {:id uuid?
+                                                           :operation :credit
+                                                           :amount 20}))
        (fact "validates valid params"
-             (-> (logic/new-transaction {:operation "credit" :amount 20})
+             (-> (logic/new-transaction "credit" 20)
                  (logic/validate-transaction)) => truthy)
 
        (fact "validates invalid operation"
-             (-> (logic/new-transaction {:operation "bar" :amount 20})
+             (-> (logic/new-transaction "bar" 20)
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid amount"
-             (-> (logic/new-transaction {:operation "debit" :amount {}})
+             (-> (logic/new-transaction "debit" {})
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid zero amount"
-             (-> (logic/new-transaction {:operation "credit" :amount 0})
+             (-> (logic/new-transaction "credit" 0)
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid negative amount"
-             (-> (logic/new-transaction {:operation "credit" :amount -10})
+             (-> (logic/new-transaction "credit" -10)
                  (logic/validate-transaction)) => false?))
 
 (facts "Transaction Process"

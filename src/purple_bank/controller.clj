@@ -6,8 +6,8 @@
 
 (defn create-user
   "Builds and validates user. If it's valid, puts the user on storage and returns it."
-  [storage params]
-  (let [user (logic/new-user params)]
+  [storage user-name]
+  (let [user (logic/new-user user-name)]
     (if (logic/validate-user user)
       (do (storage-client/put! storage [:users (:id user)] user) user))))
 
@@ -21,8 +21,8 @@
 
 (defn build-transaction
   "Builds and validates transaction. If it's valid, returns the transaction."
-  [params]
-  (->> (logic/new-transaction params)
+  [operation amount]
+  (->> (logic/new-transaction operation amount)
        (logic/validate-transaction)))
 
 (defn process-transaction

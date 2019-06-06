@@ -16,9 +16,9 @@
   "Tries to create a new user from request. If it's successful, returns response with status code 201,
   created user on body and a Location header containing user path. If it's unsuccessful, returns
   response with status code 400."
-  [{params :json-params
-    components :components}]
-  (if-let [user (controller/create-user (:storage components) params)]
+  [{{:keys [name]}    :json-params
+    {:keys [storage]} :components}]
+  (if-let [user (controller/create-user storage name)]
     (-> user
         ring-resp/response
         (ring-resp/header "Location" (str "/users/" (:id user)))
@@ -39,11 +39,11 @@
   created transaction on body. If the transaction couldn't be processed due to insufficient
   user balance, returns a response with status code 403.
   If the transaction is invalid, returns a response with status code 400."
-  [{params            :json-params
-    {:keys [user-id]} :path-params
+  [{{:keys [user-id]} :path-params
+    {:keys [operation amount]} :json-params
     {:keys [storage]} :components}]
   (if-let [user (controller/get-user storage user-id)]
-    (if-let [transaction (controller/build-transaction params)]
+    (if-let [transaction (controller/build-transaction operation amount)]
       (if (controller/process-transaction storage user transaction)
         (-> transaction
             ring-resp/response
