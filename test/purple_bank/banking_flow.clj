@@ -39,79 +39,89 @@
       :create-transaction-response
       transaction-response)))
 
-(flow
-  ;; Init world!
+
+
+(flow "Creates user and process few transactions"
+
+      init!
+
+      ;; Create a valid user
+      (fn [world] (create-user world {:name "Joao"}))
+      (fact "Expects response code 201"
+        (get-in *world* [:create-user-response :status]) => 201)
+      (fact "Expects valid response body"
+        (get-in *world* [:create-user-response :body]) => (contains {:name "Joao"
+                                                                     :balance 0.0
+                                                                     :transactions []}))
+
+      ;; Get created user
+      (fn [world] (get-user world (:user-id world)))
+      (fact "Expects response code 200"
+            (get-in *world* [:get-user-response :status]) => 200)
+      (fact "Validates response body"
+            (get-in *world* [:get-user-response :body]) => (contains {:name "Joao"
+                                                                      :balance 0.0
+                                                                      :transactions []}))
+
+      ;; Tries to create a transaction with invalid params
+      (fn [world] (create-transaction world {:operation "foo" :amount nil} (:user-id world)))
+      (fact "Expects response code 400"
+            (get-in *world* [:create-transaction-response :status]) => 400)
+      (fact "Validates response body"
+            (get-in *world* [:create-transaction-response :body]) => nil)
+
+      ;; Create a valid credit transaction to existent user
+      (fn [world] (create-transaction world {:operation "credit" :amount 20.45} (:user-id world)))
+      (fact "Expects response code 201"
+            (get-in *world* [:create-transaction-response :status]) => 201)
+      (fact "Validates response body"
+            (get-in *world* [:create-transaction-response :body]) => (contains {:operation "credit" :amount 20.45}))
+
+      ;; Create a valid debit transaction to existent user
+      (fn [world] (create-transaction world {:operation "debit" :amount 5.50} (:user-id world)))
+      (fact "Expects response code 201"
+            (get-in *world* [:create-transaction-response :status]) => 201)
+      (fact "Validates response body"
+            (get-in *world* [:create-transaction-response :body]) => (contains {:operation "debit" :amount 5.50}))
+
+      ;; Gets existent user and validates its balance
+      (fn [world] (get-user world (:user-id world)))
+      (fact "Expects response code 200"
+            (get-in *world* [:get-user-response :status]) => 200)
+      (fact "Validates response body"
+            (get-in *world* [:get-user-response :body]) => (contains {:balance 14.95}))
+
+      ;; Tries to create a valid debit transaction that exceeds user balance
+      (fn [world] (create-transaction world {:operation "debit" :amount 200} (:user-id world)))
+      (fact "Expects response code 403"
+            (get-in *world* [:create-transaction-response :status]) => 403)
+      (fact "Validates response body"
+            (get-in *world* [:create-transaction-response :body]) => nil))
+
+(flow "Creates an invalid user"
   init!
 
   ;; Tries to create an invalid user
   (fn [world] (create-user world {:name 1234}))
-  ;; Expects response code 400
-  (fact (get-in *world* [:create-user-response :status]) => 400)
+  (fact "Expects response code 400"
+        (get-in *world* [:create-user-response :status]) => 400))
 
-  ;; Tries to create a valid user
-  (fn [world] (create-user world {:name "Joao"}))
-  ;; Expects response code 201
-  (fact (get-in *world* [:create-user-response :status]) => 201)
-  ;; Validates response body
-  (fact (get-in *world* [:create-user-response :body]) => (contains {:name "Joao"
-                                                                     :balance 0.0
-                                                                     :transactions []}))
+(flow "Get nonexistent user"
+      init!
 
-  ;; Tries to get an nonexistent user
-  (fn [world] (get-user world "2jzb16k20"))
-  ;; Expects response code 404
-  (fact (get-in *world* [:get-user-response :status]) => 404)
-  ;; Validates response body
-  (fact (get-in *world* [:get-user-response :body]) => nil)
+      ;; Tries to get an nonexistent user
+      (fn [world] (get-user world "2jzb16k20"))
+      (fact "Expects response code 404"
+            (get-in *world* [:get-user-response :status]) => 404)
+      (fact "Validates response body"
+            (get-in *world* [:get-user-response :body]) => nil))
 
-  ;; Tries to get an existent user
-  (fn [world] (get-user world (:user-id world)))
-  ;; Expects response code 200
-  (fact (get-in *world* [:get-user-response :status]) => 200)
-  ;; Validates response body
-  (fact (get-in *world* [:get-user-response :body]) => (contains {:name "Joao"
-                                                                  :balance 0.0
-                                                                  :transactions []}))
+(flow "Create transaction to nonexistent user"
+      init!
 
-  ;; Tries to create a transaction with invalid params
-  (fn [world] (create-transaction world {:operation "foo" :amount nil} (:user-id world)))
-  ;; Expects response code 400
-  (fact (get-in *world* [:create-transaction-response :status]) => 400)
-  ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => nil)
-
-  ;; Tries to create a valid transaction to an nonexistent user
-  (fn [world] (create-transaction world {:operation "credit" :amount 20} "anyuser"))
-  ;; Expects response code 404
-  (fact (get-in *world* [:create-transaction-response :status]) => 404)
-  ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => nil)
-
-  ;; Tries to create a valid credit transaction to an existent user
-  (fn [world] (create-transaction world {:operation "credit" :amount 20.45} (:user-id world)))
-  ;; Expects response code 201
-  (fact (get-in *world* [:create-transaction-response :status]) => 201)
-  ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => (contains {:operation "credit" :amount 20.45}))
-
-  ;; Tries to create a valid debit transaction to an existent user
-  (fn [world] (create-transaction world {:operation "debit" :amount 5.50} (:user-id world)))
-  ;; Expects response code 201
-  (fact (get-in *world* [:create-transaction-response :status]) => 201)
-  ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => (contains {:operation "debit" :amount 5.50}))
-
-  ;; Tries to get the existent user and validates its balance
-  (fn [world] (get-user world (:user-id world)))
-  ;; Expects response code 200
-  (fact (get-in *world* [:get-user-response :status]) => 200)
-  ;; Validates response body
-  (fact (get-in *world* [:get-user-response :body]) => (contains {:balance 14.95}))
-
-  ;; Tries to create a valid debit transaction that exceeds user balance
-  (fn [world] (create-transaction world {:operation "debit" :amount 200} (:user-id world)))
-  ;; Expects response code 403
-  (fact (get-in *world* [:create-transaction-response :status]) => 403)
-  ;; Validates response body
-  (fact (get-in *world* [:create-transaction-response :body]) => nil)
-  )
+      ;; Tries to create a valid transaction to an nonexistent user
+      (fn [world] (create-transaction world {:operation "credit" :amount 20} "anyuser"))
+      (fact "Expects response code 404"
+            (get-in *world* [:create-transaction-response :status]) => 404)
+      (fact "Validates response body"
+            (get-in *world* [:create-transaction-response :body]) => nil))
