@@ -2,7 +2,8 @@
   (:require [purple-bank.logic :as logic]
             [purple-bank.db.purple-bank :as db.purple-bank]
             [purple-bank.protocols.logger-client :as logger-client]
-            [purple-bank.adapters :refer :all]))
+            [purple-bank.adapters :refer :all]
+            [clj-time.core :as t]))
 
 (defn create-user!
   "Builds and validates a new user.
@@ -37,7 +38,8 @@
   updates it and returns the transaction on result."
   (logger-client/log logger "creating-transaction" {:user-id user-id :operation operation :amount amount})
   (let [{user :data :as user-result} (get-user user-id storage logger)
-        transaction (logic/new-transaction operation amount)]
+        timestamp (str (t/now))
+        transaction (logic/new-transaction operation amount timestamp)]
     (if user
       (if (logic/validate-transaction transaction)
         (if (logic/validate-user-balance user transaction)

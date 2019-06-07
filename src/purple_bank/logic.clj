@@ -14,17 +14,19 @@
   "Validates user and returns it if it's valid or false if its not."
   (and (string? name) (not (clojure.string/blank? name)) user))
 
-(defn new-transaction [operation amount]
+(defn new-transaction [operation amount timestamp]
   "Builds a new transaction."
   {:id (UUID/randomUUID)
    :operation (keyword operation)
-   :amount  amount})
+   :amount  amount
+   :timestamp timestamp})
 
-(defn validate-transaction [{:keys [operation amount] :as transaction}]
-  "Validates transaction values and returns a boolean."
+(defn validate-transaction [{:keys [operation amount timestamp] :as transaction}]
+  "Validates transaction values and returns a bomolean."
   (and (contains? operations-set operation)
        (number? amount)
        (< 0 amount)
+       (not (clojure.string/blank? timestamp))
        transaction))
 
 (defn get-transaction-value

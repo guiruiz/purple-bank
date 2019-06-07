@@ -1,6 +1,7 @@
 (ns purple-bank.logic-test
   (:require [midje.sweet :refer :all]
-            [purple-bank.logic :as logic])
+            [purple-bank.logic :as logic]
+            [clj-time.core :as t])
   (:import [java.util UUID]))
 
 
@@ -19,6 +20,7 @@
 (def debit-transaction-2 {:id (UUID/randomUUID)
                           :operation :debit
                           :amount 175})
+(def timestamp (str (t/now)))
 
 (def user {:id (UUID/randomUUID)
            :name "Joao"
@@ -56,28 +58,33 @@
 (facts "Transaction"
 
        (fact "builds successful"
-             (logic/new-transaction "credit" 20) => (just {:id uuid?
+             (logic/new-transaction "credit" 20 timestamp) => (just {:id uuid?
                                                            :operation :credit
-                                                           :amount 20}))
+                                                           :amount 20
+                                                           :timestamp timestamp}))
        (fact "validates valid params"
-             (-> (logic/new-transaction "credit" 20)
+             (-> (logic/new-transaction "credit" 20 timestamp)
                  (logic/validate-transaction)) => truthy)
 
        (fact "validates invalid operation"
-             (-> (logic/new-transaction "bar" 20)
+             (-> (logic/new-transaction "bar" 20 timestamp)
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid amount"
-             (-> (logic/new-transaction "debit" {})
+             (-> (logic/new-transaction "debit" {} timestamp)
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid zero amount"
-             (-> (logic/new-transaction "credit" 0)
+             (-> (logic/new-transaction "credit" 0 timestamp)
                  (logic/validate-transaction)) => false?)
 
        (fact "validates invalid negative amount"
-             (-> (logic/new-transaction "credit" -10)
-                 (logic/validate-transaction)) => false?))
+             (-> (logic/new-transaction "credit" -10 timestamp)
+                 (logic/validate-transaction)) => false?)
+
+        (fact "validates invalid timestamp"
+              (-> (logic/new-transaction "credit" 10 nil)
+                  (logic/validate-transaction)) => false?))
 
 (facts "Transaction Process"
 
