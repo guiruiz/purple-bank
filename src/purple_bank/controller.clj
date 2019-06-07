@@ -11,9 +11,10 @@
   (logger-client/log logger "creating-user" {:user-name user-name})
   (let [user (logic/new-user user-name)]
     (if (logic/validate-user user)
-      (do (db.purple-bank/save-user! user storage)
-          user))))
-
+      (do
+        (db.purple-bank/save-user! user storage)
+        {:data user :error nil})
+      {:data nil :error :invalid-user})))
 
 (defn get-user
   "Retrieves user from storage identified by user-id."
@@ -24,7 +25,6 @@
           user (db.purple-bank/get-user user-uuid storage)]
       {:data user :error nil})
     (catch Exception _ {:data nil :error :user-not-found})))
-
 
 (defn create-transaction! [user-id operation amount storage logger]
   (logger-client/log logger "creating-transaction" {:user-id user-id :operation operation :amount amount})

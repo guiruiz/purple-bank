@@ -18,12 +18,15 @@
   response with status code 400."
   [{{:keys [name]}    :json-params
     {:keys [storage logger]} :components}]
-  (if-let [user (controller/create-user name storage logger)]
-    (-> user
-        ring-resp/response
-        (ring-resp/header "Location" (str "/users/" (:id user)))
-        (ring-resp/status 201))
-    (ring-resp/status {} 400)))
+  (let [{:keys [data error]} (controller/create-user name storage logger)
+        user-id (:id data)]
+    (if data
+      (-> data
+          ring-resp/response
+          (ring-resp/header "Location" (str "/users/" user-id))
+          (ring-resp/status 201))
+      (case error
+        :invalid-user (ring-resp/status {} 400)))))
 
 (defn get-user-handler
   "Returns response with status code 200 and the user on its body."
