@@ -152,13 +152,13 @@ I've decided to use hexagonal architecture on this project for three main reason
 I've decided to use [Components](https://github.com/stuartsierra/component) framework because it makes possible to have stateful resources in a functional paradigm and also it fits very well on hexagonal architecture concepts, allowing to easily couple and decouple new ports.
 
 * Config: Holds environment configurations.
-* Logger: Port component responsible for system logging. It uses different a implementation according to running environment, such as:
+* Logger: Port component responsible for system logging. It uses a different implementation according to running environment, such as:
   * Debug-Logger on development/test mode to log received events and data.
   * Logger on production mode to log only received events for data privacy purposes. In a real application, it could send logs to Datadog, for example.
 * Storage: Port component responsible for system storage. It uses InMemoryStorage implementation to any environment.
 * Routes: Encapsulates pedestal http routes.
 * Service: Builds pedestal service configurations according to running environment.
-* Servlet: Port component responsible for http requests. It creates pedestal server from service component and only starts it if running environment is development or production.  
+* Servlet: Port component responsible for http server. It creates a pedestal server from service component and only starts it if running environment is development or production.  
 
 To make sure that services can be easily changed, its implementations must defines a protocol that specifies the needed functions.
 In our case:
