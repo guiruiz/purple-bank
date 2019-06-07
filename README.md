@@ -135,16 +135,28 @@ You can also run it from REPL executing  `(-main)` for production mode or `(run-
 
 ## Tests
 The project is using [Midje](https://github.com/marick/Midje) and [selvage](https://github.com/nubank/selvage) to implement unit and integration tests.
-It has full coverage of adapters, controller and logic code.
-The tests coverages the whole code of adapaters, controller and logic.
+The tests has full coverage of adapters, controller and logic code.
 
 To run the test pipeline, execute `lein midje :autotest` command on terminal.
 
 You can also run it from REPL executing  `(do (use 'midje.repl) (autotest))`.
 
 
-## System Design
-* Hexagonal Arquitechture
-* Components
-* Pedestal as service
-* Storage in memory
+## System Design (TO DO)
+
+### Hexagonal Arquitechture
+why?
+
+### Components
+brings mutable state in a immutable context 
+fits well hexagonal easy to couple new ports
+
+* Config:
+* Logger: prod local = logger debug_logger, datadog?
+* Routes: routes config
+* Service: pedestal service
+* Servlet: start service
+* Storage: in memory db, implements storage-protocol
+
+
+
