@@ -1,9 +1,8 @@
 (ns purple-bank.controller
   (:require [purple-bank.logic :as logic]
             [purple-bank.db.purple-bank :as db.purple-bank]
-            [purple-bank.protocols.logger-client :as logger-client])
-  (:import [java.util UUID]))
-
+            [purple-bank.protocols.logger-client :as logger-client]
+            [purple-bank.adapters :refer :all]))
 
 (defn create-user
   "Builds and validates user. If it's valid, puts the user on storage and returns it."
@@ -20,11 +19,11 @@
   "Retrieves user from storage identified by user-id."
   [user-id storage logger]
   (logger-client/log logger "getting-user" {:user-id user-id})
-  (try
-    (let [user-uuid (UUID/fromString user-id)
-          user (db.purple-bank/get-user user-uuid storage)]
-      {:data user :error nil})
-    (catch Exception _ {:data nil :error :user-not-found})))
+  (let [user-uuid (str->uuid user-id)
+        user (db.purple-bank/get-user user-uuid storage)]
+    (if user
+      {:data user :error nil}
+      {:data nil :error :user-not-found})))
 
 (defn create-transaction! [user-id operation amount storage logger]
   (logger-client/log logger "creating-transaction" {:user-id user-id :operation operation :amount amount})
