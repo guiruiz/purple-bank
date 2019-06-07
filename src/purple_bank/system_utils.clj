@@ -8,12 +8,8 @@
   (swap! system #(component/stop %)))
 
 (defn get-component! [component-name]
+  "Get component from system identified by name."
   (some-> system deref (get component-name)))
-
-(defn stop-system! []
-  (stop-components!)
-  (shutdown-agents))
-
 
 (defn start-system! [system-map]
   "Starts components system and returns it."

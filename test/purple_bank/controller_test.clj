@@ -17,13 +17,13 @@
            :transactions []})
 
 (fact "Tries to create valid user"
-      (controller/create-user user-name ..storage.. ..logger..) => (contains {:data not-empty :error nil?})
+      (controller/create-user! user-name ..storage.. ..logger..) => (contains {:data not-empty :error nil?})
       (provided
         (logger-client/log ..logger.. irrelevant irrelevant) => irrelevant
         (db.purple-bank/save-user! (contains {:name user-name}) ..storage..) => irrelevant))
 
 (fact "Tries to create invalid user"
-      (controller/create-user nil ..storage.. ..logger..) => (just {:data nil? :error :invalid-user})
+      (controller/create-user! nil ..storage.. ..logger..) => (just {:data nil? :error :invalid-user})
       (provided
         (logger-client/log ..logger.. irrelevant irrelevant) => irrelevant))
 
@@ -66,7 +66,7 @@
                                       :debit
                                       300
                                       ..storage..
-                                      ..logger..) => (just {:data nil? :error :non-sufficient-funds})
+                                      ..logger..) => (just {:data nil? :error :non-sufficient-balance})
       (provided
         (logger-client/log ..logger.. irrelevant irrelevant) => irrelevant
         (controller/get-user user-uuid irrelevant irrelevant) => {:data user :error nil}))
@@ -76,7 +76,7 @@
                                       :debit
                                       300
                                       ..storage..
-                                      ..logger..) => (just {:data nil? :error :non-sufficient-funds})
+                                      ..logger..) => (just {:data nil? :error :non-sufficient-balance})
       (provided
         (logger-client/log ..logger.. irrelevant irrelevant) => irrelevant
         (controller/get-user user-uuid irrelevant irrelevant) => {:data user :error nil}))

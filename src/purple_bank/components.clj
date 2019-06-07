@@ -11,7 +11,7 @@
             [purple-bank.service :as service]))
 
 (defn base-system-map
-  "Builds components system map and returns it."
+  "Builds base components system map and returns it."
   [env]
   (component/system-map
     :config (config-component/new-config env)
@@ -22,6 +22,7 @@
     :servlet (component/using (servlet-component/new-servlet) [:service :config])))
 
 (defn local-system-map
+  "Builds base components system map overriding with local components."
   [env]
   (merge (base-system-map env)
          (component/system-map
