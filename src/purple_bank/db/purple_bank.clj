@@ -5,5 +5,5 @@
 (defn save-user! [user storage]
   (storage-client/put! storage (:id user) user))
 
-(defn get-user [user-id storage]
-  (storage-client/read-one storage user-id))
+(defn get-user [user-uuid storage]
+  (storage-client/read-one storage user-uuid))

@@ -29,9 +29,11 @@
   "Returns response with status code 200 and the user on its body."
   [{{:keys [user-id]} :path-params
     {:keys [storage logger]} :components}]
-    (if-let [user (controller/get-user user-id storage logger)]
-      (ring-resp/response user)
-      (ring-resp/status {} 404)))
+  (let [{:keys [data error]} (controller/get-user user-id storage logger)]
+    (if data
+      (ring-resp/response data)
+      (case error
+        :user-not-found (ring-resp/status {} 404)))))
 
 (defn create-transaction-handler
   "First, tries to build a transaction. If the transaction is valid, then tries to process it.
@@ -42,17 +44,15 @@
   [{{:keys [user-id]} :path-params
     {:keys [operation amount]} :json-params
     {:keys [storage logger]} :components}]
-  (let [user (controller/get-user user-id storage logger)
-        transaction (controller/build-transaction operation amount logger)]
-    (if user
-      (if transaction
-        (if (controller/process-transaction transaction user storage logger)
-          (-> transaction
-              ring-resp/response
-              (ring-resp/status 201))
-          (ring-resp/status {} 403))
-        (ring-resp/status {} 400))
-      (ring-resp/status {} 404))))
+  (let [{:keys [data error]} (controller/create-transaction! user-id operation amount storage logger)]
+    (if data
+      (-> data
+          ring-resp/response
+          (ring-resp/status 201))
+      (case error
+        :user-not-found (ring-resp/status {} 404)
+        :invalid-transaction (ring-resp/status {} 400)
+        :non-sufficient-funds (ring-resp/status {} 403)))))
 
 
 (def routes #{["/" :get (conj common-interceptors

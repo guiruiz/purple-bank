@@ -41,8 +41,8 @@
        (assoc user :balance)))
 
 
-(defn validate-operation [user {:keys [operation] :as transaction}]
-  "Validates operation checking if user has enough balance to realize the transaction."
+(defn validate-user-balance [user {:keys [operation] :as transaction}]
+  "Validates if user has enough balance to realize the transaction."
   (if (= operation :debit)
     (-> (calculate-user-balance transaction user)
         (get :balance)

@@ -14,29 +14,28 @@
       (do (db.purple-bank/save-user! user storage)
           user))))
 
+
 (defn get-user
   "Retrieves user from storage identified by user-id."
   [user-id storage logger]
   (logger-client/log logger "getting-user" {:user-id user-id})
-  (try (-> (UUID/fromString user-id)
-           (db.purple-bank/get-user storage))
-       (catch Exception _ false)))
+  (try
+    (let [user-uuid (UUID/fromString user-id)
+          user (db.purple-bank/get-user user-uuid storage)]
+      {:data user :error nil})
+    (catch Exception _ {:data nil :error :user-not-found})))
 
-(defn build-transaction
-  "Builds and validates transaction. If it's valid, returns the transaction."
-  [operation amount logger]
-  (logger-client/log logger "building-transaction" {:operation operation :amount amount})
-  (->> (logic/new-transaction operation amount)
-       (logic/validate-transaction)))
 
-(defn process-transaction
-  "Validates transaction operation. If it's valid, process transaction, updates the user on storage
-  and returns the transaction."
-  [transaction user storage logger]
-  (logger-client/log logger "procesing-transaction" {:transaction transaction :user user})
-  (if (logic/validate-operation user transaction)
-    (do
-      (-> (logic/process-user-transaction user transaction)
-           (db.purple-bank/save-user! storage))
-      transaction)))
-
+(defn create-transaction! [user-id operation amount storage logger]
+  (logger-client/log logger "creating-transaction" {:user-id user-id :operation operation :amount amount})
+  (let [{user :data :as user-result} (get-user user-id storage logger)
+        transaction (logic/new-transaction operation amount)]
+    (if user
+      (if (logic/validate-transaction transaction)
+        (if (logic/validate-user-balance user transaction)
+          (do (-> (logic/process-user-transaction user transaction)
+                  (db.purple-bank/save-user! storage))
+              {:data transaction :error nil})
+          {:data nil :error :non-sufficient-funds})
+        {:data nil :error :invalid-transaction})
+      user-result)))

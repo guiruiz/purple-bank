@@ -87,11 +87,11 @@
        (fact "gets valid absolute value from debit transaction"
              (logic/get-transaction-value debit-transaction-1) => -50)
 
-       (fact "validates valid transaction operation"
-             (logic/validate-operation user-mock debit-transaction-1) => true?)
+       (fact "validates sufficient user"
+             (logic/validate-user-balance user-mock debit-transaction-1) => true?)
 
-       (fact "validates invalid transaction operation"
-             (logic/validate-operation user-mock debit-transaction-2) => false?)
+       (fact "validates non-sufficient user balance"
+             (logic/validate-user-balance user-mock debit-transaction-2) => false?)
 
        (fact "process valid transaction operation"
              (logic/process-user-transaction user-mock debit-transaction-1) => (just (-> (assoc user :transactions [credit-transaction-1
