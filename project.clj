@@ -1,4 +1,4 @@
-(defproject purplre-bank "0.1.0-SNAPSHOT"
+(defproject purple-bank "0.1.0-SNAPSHOT"
   :description "Purple Bank"
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
