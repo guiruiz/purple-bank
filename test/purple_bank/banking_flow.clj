@@ -1,13 +1,13 @@
 (ns purple-bank.banking-flow
   (:require [midje.sweet :refer :all]
-            [purple-bank.components :as components]
+            [purple-bank.system-utils :as system-utils]
             [purple-bank.protocols.storage-client :as storage-client]
             [purple-bank.http-helpers :as http-helpers]
             [selvage.flow :refer [*world* flow]]))
 
 (defn init!
   [world]
-  (let [component-system (components/get-or-create-system! :test)]
+  (let [component-system (system-utils/get-or-create-system! :test)]
     (storage-client/clear-all! (:storage component-system))
     (assoc world :system component-system)))
 

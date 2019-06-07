@@ -1,9 +1,9 @@
 (ns purple-bank.service-test
   (:require [midje.sweet :refer :all]
-            [purple-bank.components :as components]
+            [purple-bank.system-utils :as system-utils]
             [purple-bank.http-helpers :refer [GET]]))
 
-(components/get-or-create-system! :test)
+(system-utils/get-or-create-system! :test)
 
 (fact "Get welcome message"
       (-> (GET "/")

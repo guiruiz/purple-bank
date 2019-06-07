@@ -1,6 +1,5 @@
 (ns purple-bank.components
   (:require [com.stuartsierra.component :as component]
-            [purple-bank.system-utils :as system-utils]
             [purple-bank.components.config :as config-component]
             [purple-bank.components.routes :as routes-component]
             [purple-bank.components.storage :as storage-component]
@@ -28,23 +27,10 @@
          (component/system-map
            :logger (component/using (debug-logger-component/new-debug-logger) [:config]))))
 
-(def system-map
-  {:prod  (base-system-map :prod)
-   :dev   (local-system-map :dev)
-   :test  (local-system-map :test)})
 
-(defn create-and-start-system!
-  "Creates and start components system."
-  ([] (create-and-start-system! :dev))
-  ([env] (system-utils/start-system! (env system-map))))
-
-(defn stop-system!
-  "Stops components system and returns it."
-  []
-  (system-utils/stop-components!))
-
-(defn get-or-create-system!
-  "Gets or creates component system"
+(defn get-system-map
   [env]
-  (or (deref system-utils/system)
-      (create-and-start-system! env)))
+  (case env
+    :prod  (base-system-map env)
+    :dev   (local-system-map env)
+    :test  (local-system-map env)))
