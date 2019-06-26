@@ -49,3 +49,12 @@
           {:data nil :error :non-sufficient-balance})
         {:data nil :error :invalid-transaction})
       user-result)))
+
+
+(defn get-transactions [user-id storage logger]
+  (logger-client/log logger "get-transactions" {:user-id user-id})
+  (let [{user :data :as user-result} (get-user user-id storage logger)
+        transactions (:transactions user)]
+    (if user
+      {:data transactions :error nil}
+      user-result)))

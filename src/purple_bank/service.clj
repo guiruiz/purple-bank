@@ -61,6 +61,17 @@
         :invalid-transaction (ring-resp/status {} 400)
         :non-sufficient-balance (ring-resp/status {} 403)))))
 
+(defn get-transactions-handler
+  [{{:keys [user-id]} :path-params
+    {:keys [storage logger]} :components}]
+  (let [{:keys [data error]} (controller/get-transactions user-id storage logger)]
+    (if data
+      (-> data
+          ring-resp/response
+          (ring-resp/status 201))
+      (case error
+        :user-not-found (ring-resp/status {} 404)))))
+
 
 (def routes #{["/" :get (conj common-interceptors
                               `welcome-message-handler)]
@@ -69,4 +80,6 @@
               ["/users/:user-id" :get (conj common-interceptors
                                             `get-user-handler)]
               ["/users/:user-id/transactions" :post (conj common-interceptors
-                                                          `create-transaction-handler)]})
+                                                          `create-transaction-handler)]
+              ["/users/:user-id/transactions" :get (conj common-interceptors
+                                                         `get-transactions-handler)]})
